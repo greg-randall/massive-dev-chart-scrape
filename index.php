@@ -8,7 +8,9 @@
 	$films = array_filter(explode(PHP_EOL, $films));//remove empty lines from the array
 	
 	$fp = fopen('file.csv', 'w');//open the output file	
+	fputcsv($fp, array("Film","Developer","Dilution","ASA/ISO","35mm","120","Sheet","Temp","Notes")); //add header
 	
+	$counter=1;//count the output for progress
 	foreach ($films as &$film_page) {//iterate through the pages for all flims
 		$data = file_get_contents("http://www.digitaltruth.com/devchart.php?Developer=&mdc=Search&TempUnits=F&Film=" . urlencode($film_page));//download the page with the film/developer combos
 	    $data = strip_tags($data, "<table><tr><td><th>");//remove all tags execept for tables
@@ -25,6 +27,8 @@
 	    $data = str_replace("</td><td>", "~", $data);//replace the table tags with a delimiter
 	    $data = str_replace(array("<tr>","</tr>","<td>","</td>"), "", $data);//get rid of extra html
 	    
+	    $data = trim($data);//get rid of white space
+	    
 	    $data = explode(PHP_EOL, $data);//split the data up by linebreaks
 	    array_shift($data);//get rid of the header
 	    
@@ -37,7 +41,8 @@
 	            }
 	        }
 	        fputcsv($fp, $film);// output that line to the output CSV
-	        echo $film[0] . " -- " . $film[1] . "<br>"; //output some text as a progress indicator
+	        echo $counter ." -- " . $film[0] . " -- " . $film[1] . "<br>"; //output some text as a progress indicator
+			$counter++;
 	    }
 	}
 	fclose($fp);//close the output file.
