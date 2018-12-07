@@ -9,7 +9,16 @@ $linebreak = "\n"; //seems to need '\n' on windows while 'PHP_EOL' works on linu
 $base_url="https://www.digitaltruth.com/devchart.php?Developer=&mdc=Search&TempUnits=C&TimeUnits=T&Film=";
 
 
-$films = file_get_contents("http://www.digitaltruth.com/devchart.php"); //get list of flims
+$arrContextOptions=array(
+    "ssl"=>array(
+        "verify_peer"=>false,
+        "verify_peer_name"=>false,
+    ),
+);  
+
+
+
+$films = file_get_contents("http://www.digitaltruth.com/devchart.php", false, stream_context_create($arrContextOptions)); //get list of flims
 $films = explode('<option value="">All Films</option>', trim($films)); //get the list of films by itself
 $films = preg_replace("/.+\"(.+)\".+/", "$1", $films[1]); //get the film name selector value
 $films = array_filter(explode($linebreak, $films)); //remove empty lines from the array
@@ -35,7 +44,7 @@ foreach($films as & $film_page)
 	    echo "<a href=\"$scrape_url\">$scrape_url</a><br>";
 		}
 
-    $data = file_get_contents($scrape_url); //download the page with the film/developer combos
+    $data = file_get_contents($scrape_url, false, stream_context_create($arrContextOptions)); //download the page with the film/developer combos
     $data = strip_tags($data, "<table><tr><td><th><a>"); //remove all tags execept for tables
 	  $data = preg_replace('/\s?class=".*?"/', '', $data); //remove all classes
 		$data = preg_replace("/\s?class='.*?'/", "", $data); //remove all classes
